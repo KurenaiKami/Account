@@ -1,0 +1,7 @@
+development:
+  adapter: mysql2
+  database: kaze_crm
+  username: root
+  password: "031776"
+  host: localhost
+  encoding: utf8

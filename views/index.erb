@@ -1,0 +1,178 @@
+<style type="text/css">
+    #container {
+        display: -moz-flex; 
+        display: -webkit-flex; 
+        display: flex; 
+        justify-content: center
+    }
+    #chart{
+        margin:0 50px;
+        flex-shrink: 1; 
+        flex-grow: 1; 
+    }
+</style>
+
+<div id="example">
+    <div class="smart-widget">
+        <div class="smart-widget-header">
+            筛选数据
+        </div>
+
+        <div id = "container">
+            <div>
+                <h4>选择日期</h4>
+                <div id="calendar"></div>
+            </div>
+
+            <div id="chart">
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+<div>
+    <div class="smart-widget">
+        <div class="smart-widget-header">
+            新增玩家总览
+        </div>
+
+        <div id="employeegrid">
+        </div>
+    </div>
+</div>
+
+<script src="js/jszip.min.js"></script>
+
+<script>
+
+    function renderChart(date)
+    {
+        //表格
+        $("#chart").kendoChart({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/getdaycount?time="+ date,
+                        dataType: "json"
+                    }
+                },
+                sort: {
+                    field: "日期",
+                    dir: "新增玩家数量"
+                }
+            },
+            legend: {
+                position: "top"
+            },
+            seriesDefaults: {
+                type: "bar"
+            },
+            series:
+            [{
+                name: "新增用户数量",
+                field: "active_count"
+            },{
+                name: "活跃用户数量",
+                field: "brisk_count"
+            }],
+            categoryAxis: {
+                field: "active_time",
+                majorGridLines: {
+                    visible: false
+                }
+            },
+            valueAxis: {
+                labels: {
+                    format: "N0"
+                },
+                line: {
+                    visible: false
+                }
+            },
+            tooltip: {
+                visible: true,
+                format: "N0"
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        kendo.culture("zh-CN");
+        dataSource = new kendo.data.DataSource({
+            transport: {
+                read:  {
+                    url:  "/getalldata",
+                    dataType: "json",
+                    type: "post"
+                },
+                parameterMap: function(options, operation) {
+                    if (operation !== "read" && options.models) {
+                        return {models: kendo.stringify(options.models)};
+                    }
+                }
+            },
+            batch: true,
+            pageSize: 10,
+            schema: {
+                model: {
+                    id: "_id",
+                    fields: {
+                        _id: { editable: false, nullable: true },
+                        active_time: {type: "date", validation: { required: true}},
+                        active_plat_form: {type: "string", validation: { required: true}},
+                        active_devece_id: {type:"string",validation:{required: true}}
+                    }
+                }
+            }
+        });
+
+
+        $("#employeegrid").kendoGrid({
+            dataSource: dataSource,
+            pageable: true,
+            height: 600,
+
+            toolbar: ["excel"],
+            excel: {
+                fileName: "数据信息.xlsx",
+                proxyURL: "/getalldata",
+                filterable: true
+            },
+            sortable: {
+                mode: "single",
+                allowUnsort: false
+            },
+            filterable: {
+                mode: "row"
+            },
+            columns:  [
+                    { field: "active_time", title: "新增玩家日期", template: '#= kendo.toString(active_time,"yyyy/MM/dd") #' },
+                    { field: "active_plat_form", title: "平台" },
+                    { field: "active_devece_id", title: "设备id" }],
+            editable: "inline"
+        });
+
+        
+        //选择日期查询
+        $("#calendar").kendoCalendar({
+            change: onChange,
+            navigate: onNavigate
+        });
+
+         function onChange() {
+            console.log("Change :: " + kendo.toString(this.value(), 'yyyy/MM/dd'));
+
+            renderChart(kendo.toString(this.value(), 'yyyy/MM/dd'));
+        }
+
+        function onNavigate() {
+            
+        }
+
+        renderChart("null");
+
+    });
+</script>

@@ -1,0 +1,42 @@
+
+
+
+<input name="hi" type="button" value="检查" onClick="clickHandler();"> 
+
+<script>
+      function clickHandler()
+      {
+        var xmlstr = '<request>
+        <userId>xxx</userId>
+        <contentId>000000000000</contentId>
+        <consumeCode>006121511001</consumeCode>
+        <cpid>701010</cpid>
+        <hRet>0</hRet>
+        <status>1800</status>
+        <versionId>xxx</versionId>
+        <cpparam>xxx</cpparam>
+        <packageID>333</packageID>
+        </request>';
+        $.ajax({
+
+             url:'/mgresponse',
+             data : xmlstr,
+             dataType: 'text',
+             type: 'POST',
+             success:function(data){
+
+             },
+
+             error:function(){
+
+                 //失败调用该函数
+
+                 alert('系统出错');
+
+             }
+
+          });
+      }
+ 
+
+</script>
